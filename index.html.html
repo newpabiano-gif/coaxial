@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>NeuroCoax · EVT System Builder V4</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-dark: #05070a; --panel-bg: rgba(15, 23, 42, 0.7);
+    --neon-blue: #3b82f6; --neon-purple: #8b5cf6; --neon-emerald: #10b981; --neon-rose: #f43f5e; --neon-amber: #f59e0b;
+  }
+  body { background: var(--bg-dark); color: #e2e8f0; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+  .glass { background: var(--panel-bg); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.05); border-radius: 1rem; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  
+  /* Select Dropdown Styling - iOS 확대 방지를 위해 font-size 16px 고정 */
+  select { width: 100%; background: #0f172a; border: 1px solid #334155; color: #f8fafc; padding: 1rem; border-radius: 0.75rem; appearance: none; outline: none; font-weight: 600; font-size: 16px; transition: all 0.2s; }
+  select:focus { border-color: var(--neon-blue); box-shadow: 0 0 0 2px rgba(59,130,246,0.2); }
+  select:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Y-Connector Buttons - 터치 영역 확보 */
+  .y-btn { flex: 1; padding: 0.8rem 0; font-size: 0.75rem; font-weight: 800; border: 1px solid #334155; color: #64748b; transition: all 0.2s; cursor: pointer; }
+  .y-btn.active { background: #1e293b; color: white; border-color: #475569; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); }
+  .y-btn-0.active { border-bottom-color: #64748b; }
+  .y-btn-5.active { border-bottom-color: var(--neon-amber); color: var(--neon-amber); }
+  .y-btn-10.active { border-bottom-color: var(--neon-rose); color: var(--neon-rose); }
+
+  /* Connector Lines */
+  .chain-line { width: 2px; height: 30px; margin-left: 2rem; background: linear-gradient(to bottom, var(--top-color), var(--bot-color)); }
+
+  /* Badge */
+  .badge { font-size: 0.65rem; font-weight: 800; padding: 0.3rem 0.8rem; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.05em; }
+  
+  /* Stent Mesh Pattern */
+  .mesh-pattern {
+    background-image: linear-gradient(45deg, rgba(245, 158, 11, 0.4) 25%, transparent 25%, transparent 75%, rgba(245, 158, 11, 0.4) 75%, rgba(245, 158, 11, 0.4)), 
+                      linear-gradient(45deg, rgba(245, 158, 11, 0.4) 25%, transparent 25%, transparent 75%, rgba(245, 158, 11, 0.4) 75%, rgba(245, 158, 11, 0.4));
+    background-size: 4px 4px;
+    background-position: 0 0, 2px 2px;
+  }
+
+  /* Scrollbar hiding for clean UI */
+  ::-webkit-scrollbar { width: 0px; background: transparent; }
+</style>
+</head>
+<body class="pb-32">
+
+<div class="max-w-md mx-auto p-4 space-y-4 relative min-h-screen">
+  
+  <header class="flex justify-between items-end py-2 mb-2">
+    <div>
+      <div class="flex items-center gap-2 mb-1.5">
+        <div class="flex items-center bg-[#004b87] text-white text-[10px] font-black px-2 py-0.5 rounded shadow-[0_0_8px_rgba(0,75,135,0.6)] tracking-wider">
+          <span class="mr-1 text-[8px]">🏥</span> SNUBH
+        </div>
+        <p class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Full Database Edition</p>
+      </div>
+      <h1 class="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-400 italic tracking-tight">NeuroCoax <span class="text-sm text-blue-500">V4</span></h1>
+    </div>
+    <button onclick="resetAll()" class="badge border border-slate-700 text-slate-400 hover:text-white hover:bg-slate-800">RESET</button>
+  </header>
+
+  <div class="glass p-5 relative overflow-hidden">
+    <div class="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
+    <label class="block text-[10px] font-bold text-blue-400 mb-2 uppercase tracking-widest">01. Access / Guiding</label>
+    <select id="sel-0" onchange="updateSystem()"><option value="">Select Access Catheter...</option></select>
+    <div id="info-0" class="flex justify-between mt-3 text-[11px] text-slate-400 mono hidden">
+      <span>ID: <span id="id-0" class="text-white font-bold"></span>"</span>
+      <span>Len: <span id="wl-0" class="text-white font-bold"></span>cm</span>
+    </div>
+  </div>
+
+  <div class="chain-line" style="--top-color: #3b82f6; --bot-color: #8b5cf6;"></div>
+  
+  <div class="flex items-center gap-4 px-4 -my-2">
+    <div class="text-[10px] font-bold text-slate-500 w-12">Y-RHV</div>
+    <div class="flex rounded-lg overflow-hidden border border-slate-700 bg-slate-900 w-full">
+      <button class="y-btn y-btn-0 y1 active" onclick="setY(1, 0)">0cm</button>
+      <button class="y-btn y-btn-5 y1" onclick="setY(1, 5)">5cm</button>
+      <button class="y-btn y-btn-10 y1" onclick="setY(1, 10)">10cm</button>
+    </div>
+  </div>
+
+  <div class="chain-line" style="--top-color: #8b5cf6; --bot-color: #10b981;"></div>
+
+  <div class="glass p-5 relative overflow-hidden">
+    <div class="absolute top-0 left-0 w-1 h-full bg-purple-500"></div>
+    <label class="block text-[10px] font-bold text-purple-400 mb-2 uppercase tracking-widest">02. Intermediate / Aspiration</label>
+    <select id="sel-1" onchange="updateSystem()" disabled><option value="">Waiting for Step 01...</option></select>
+    <div id="info-1" class="flex justify-between mt-3 text-[11px] text-slate-400 mono hidden">
+      <span>Type: <span id="type-1" class="text-purple-300 font-bold uppercase text-[9px]"></span></span>
+      <span>ID/OD: <span id="id-1" class="text-white font-bold"></span> / <span id="od-1" class="text-white font-bold"></span>"</span>
+      <span>Margin: <span id="wl-1" class="text-white font-bold"></span>cm</span>
+    </div>
+  </div>
+
+  <div class="chain-line" style="--top-color: #8b5cf6; --bot-color: #10b981;"></div>
+
+  <div class="flex items-center gap-4 px-4 -my-2">
+    <div class="text-[10px] font-bold text-slate-500 w-12">Y-RHV</div>
+    <div class="flex rounded-lg overflow-hidden border border-slate-700 bg-slate-900 w-full">
+      <button class="y-btn y-btn-0 y2 active" onclick="setY(2, 0)">0cm</button>
+      <button class="y-btn y-btn-5 y2" onclick="setY(2, 5)">5cm</button>
+      <button class="y-btn y-btn-10 y2" onclick="setY(2, 10)">10cm</button>
+    </div>
+  </div>
+
+  <div class="chain-line" style="--top-color: #10b981; --bot-color: #f59e0b;"></div>
+
+  <div class="glass p-5 relative overflow-hidden">
+    <div class="absolute top-0 left-0 w-1 h-full bg-emerald-500"></div>
+    <label class="block text-[10px] font-bold text-emerald-400 mb-2 uppercase tracking-widest">03. Microcatheter</label>
+    <select id="sel-2" onchange="updateSystem()" disabled><option value="">Waiting for Step 02...</option></select>
+    <div id="info-2" class="flex justify-between mt-3 text-[11px] text-slate-400 mono hidden">
+      <span>ID/OD: <span id="id-2" class="text-white font-bold"></span> / <span id="od-2" class="text-white font-bold"></span>"</span>
+      <span>Margin: <span id="wl-2" class="text-white font-bold"></span>cm</span>
+    </div>
+  </div>
+
+  <div class="chain-line" style="--top-color: #10b981; --bot-color: #f59e0b;"></div>
+
+  <div class="glass p-5 relative overflow-hidden mb-6">
+    <div class="absolute top-0 left-0 w-1 h-full bg-amber-500"></div>
+    <label class="block text-[10px] font-bold text-amber-400 mb-2 uppercase tracking-widest">04. Stent Retriever</label>
+    <select id="sel-3" onchange="updateSystem()" disabled><option value="">Waiting for Step 03...</option></select>
+  </div>
+
+  <div id="visualizer-container" class="glass p-4 mt-6 mb-8 relative hidden">
+    <div class="bg-[#0f172a] rounded p-2 mb-4 border border-slate-700">
+      <div class="text-[9px] font-bold text-slate-400 mb-1 uppercase">System Rules Validation</div>
+      <div class="flex justify-between text-[10px] font-mono">
+        <span id="rule-asp-stent" class="text-emerald-400">✓ Asp+Stent (Max 2): 0</span>
+        <span id="rule-int" class="text-emerald-400">✓ Intermediate (Max 1): 0</span>
+      </div>
+    </div>
+
+    <label class="block text-[10px] font-bold text-slate-400 mb-6 uppercase tracking-widest text-center">Coaxial System Diagram</label>
+    <div id="visualizer" class="relative w-full h-16 flex items-center mb-2">
+      </div>
+  </div>
+
+</div>
+
+<div id="console" class="fixed bottom-0 left-0 w-full z-50 bg-[#0f172a] border-t border-slate-700 p-5 shadow-[0_-10px_40px_rgba(0,0,0,0.8)] transition-all duration-300 transform translate-y-full">
+  <div class="max-w-md mx-auto flex items-center gap-4">
+    <div id="res-icon" class="text-4xl drop-shadow-lg">✅</div>
+    <div class="flex-1">
+      <h3 id="res-title" class="text-sm font-black italic tracking-wide text-white uppercase">System Ready</h3>
+      <p id="res-desc" class="text-[11px] text-slate-400 mt-1 font-medium leading-relaxed"></p>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==========================================
+// 1. MASSIVE DATABASE (생략 없이 모두 포함)
+// ==========================================
+const DB = {
+  access: [
+    {n:"OPTIMO 9F 95cm", id:0.118, wl:95}, {n:"OPTIMO 9F 90cm", id:0.118, wl:90}, {n:"OPTIMO 8F 90cm", id:0.106, wl:90},
+    {n:"PARAGON 8F 95cm", id:0.106, wl:95}, {n:"PARAGON 8F 85cm", id:0.106, wl:85},
+    {n:"FlowGate2 8F 95cm", id:0.106, wl:95}, {n:"FlowGate2 8F 85cm", id:0.106, wl:85},
+    {n:"GuiderSofttip 8F 100cm", id:0.105, wl:100}, {n:"GuiderSofttip 7F 100cm", id:0.092, wl:100}, {n:"GuiderSofttip 6F 100cm", id:0.079, wl:100},
+    {n:"Fubuki 8F 90cm", id:0.090, wl:90}, {n:"Fubuki 7F 100cm", id:0.081, wl:100}, {n:"Fubuki 7F 90cm", id:0.081, wl:90}, {n:"Fubuki 6F 100cm", id:0.071, wl:100}, {n:"Fubuki 6F 90cm", id:0.071, wl:90},
+    {n:"Envoy 7F 100cm", id:0.091, wl:100}, {n:"Envoy 7F 90cm", id:0.091, wl:90}, {n:"Envoy 6F 100cm", id:0.078, wl:100}, {n:"Envoy 6F 90cm", id:0.078, wl:90}, {n:"Envoy 5F 100cm", id:0.065, wl:100}, {n:"Envoy 5F 90cm", id:0.065, wl:90},
+    {n:"Shuttle 8F 80cm", id:0.145, wl:80}, {n:"Shuttle 7F 90cm", id:0.129, wl:90}, {n:"Shuttle 6F 90cm", id:0.114, wl:90}, {n:"Shuttle 6F 110cm", id:0.114, wl:110}
+  ],
+  inter: [
+    // Aspirations (type: 'asp')
+    {n:"ACE 68 (132cm)", od:0.080, id:0.068, wl:132, type:'asp'}, {n:"JET 7 (132cm)", od:0.082, id:0.072, wl:132, type:'asp'},
+    {n:"REACT 71 (132cm)", od:0.083, id:0.071, wl:132, type:'asp'}, {n:"REACT 68 (132cm)", od:0.083, id:0.068, wl:132, type:'asp'},
+    {n:"Sofia Plus 6F 125cm", od:0.0825, id:0.070, wl:125, type:'asp'}, {n:"Sofia Plus 6F 132cm", od:0.0825, id:0.070, wl:132, type:'asp'},
+    {n:"AXS Vecta 74 132cm", od:0.087, id:0.074, wl:132, type:'asp'}, {n:"AXS Vecta 74 125cm", od:0.087, id:0.074, wl:125, type:'asp'}, {n:"AXS Vecta 71 125cm", od:0.085, id:0.071, wl:125, type:'asp'},
+    {n:"CEREGLIDE 71 132cm", od:0.082, id:0.071, wl:132, type:'asp'}, {n:"Embovac 132cm", od:0.0825, id:0.071, wl:132, type:'asp'},
+    {n:"RED 72 (132cm)", od:0.085, id:0.072, wl:132, type:'asp'}, {n:"RED 68 (132cm)", od:0.081, id:0.068, wl:132, type:'asp'}, {n:"RED 62 (132cm)", od:0.076, id:0.062, wl:132, type:'asp'},
+    {n:"5MAX (132cm)", od:0.080, id:0.062, wl:132, type:'asp'}, {n:"4MAX (139cm)", od:0.080, id:0.041, wl:139, type:'asp'}, {n:"3MAX (160cm)", od:0.062, id:0.035, wl:160, type:'asp'},
+    // Intermediates (type: 'int')
+    {n:"Sofia 6F 115cm", od:0.068, id:0.055, wl:115, type:'int'}, {n:"Sofia 5F 125cm", od:0.068, id:0.055, wl:125, type:'int'}, {n:"Sofia 5F 115cm", od:0.068, id:0.055, wl:115, type:'int'},
+    {n:"DAC 070 120cm", od:0.082, id:0.070, wl:120, type:'int'}, {n:"DAC 057 125cm", od:0.068, id:0.057, wl:125, type:'int'}, {n:"DAC 044 136cm", od:0.056, id:0.044, wl:136, type:'int'},
+    {n:"AXSCatalyst 6F 132cm", od:0.079, id:0.068, wl:132, type:'int'}, {n:"Neuronmax 6F 90cm", od:0.088, id:0.068, wl:90, type:'int'}
+  ],
+  micro: [
+    {n:"XT-27 Flex (150cm)", od:0.038, id:0.027, wl:150},
+    {n:"Rebar 27 (145cm)", od:0.037, id:0.027, wl:145}, {n:"Rebar 18 (153cm)", od:0.035, id:0.021, wl:153}, {n:"Rebar 14 (153cm)", od:0.031, id:0.017, wl:153},
+    {n:"Phenom 27 (160cm)", od:0.040, id:0.027, wl:160}, {n:"Phenom 21 (160cm)", od:0.034, id:0.021, wl:160},
+    {n:"Marksman (160cm)", od:0.042, id:0.027, wl:160},
+    {n:"HeadWay 21 (150cm)", od:0.033, id:0.021, wl:150}, {n:"HeadWay 17 (150cm)", od:0.031, id:0.017, wl:150},
+    {n:"Excelsior SL-10 (150cm)", od:0.031, id:0.017, wl:150}, {n:"Echelon 10 (150cm)", od:0.028, id:0.017, wl:150},
+    {n:"Prowler Select Plus (150cm)", od:0.037, id:0.021, wl:150}
+  ],
+  stent: [
+    {n:"SolitaireFR 6x30", mid:0.027}, {n:"SolitaireFR 4x20", mid:0.021}, {n:"SolitaireX 6x40", mid:0.021}, {n:"SolitaireX 4x40", mid:0.021}, {n:"SolitaireX 3x30", mid:0.021},
+    {n:"Trevo 6x37", mid:0.021}, {n:"Trevo 4x41", mid:0.021}, {n:"Trevo 3x32", mid:0.015},
+    {n:"Embotrap 5x37", mid:0.021}, {n:"preset 4x20", mid:0.0165}
+  ]
+};
+
+let yVals = [0, 0, 0];
+
+function init() {
+  populateSelect('sel-0', DB.access);
+}
+
+function populateSelect(id, data, filterFn) {
+  const el = document.getElementById(id);
+  const currentVal = el.value;
+  el.innerHTML = '<option value="">Select Device...</option>';
+  data.forEach((item, idx) => {
+    const isFit = filterFn ? filterFn(item) : {ok: true};
+    const mark = isFit.ok ? '' : `[${isFit.reason}] `;
+    
+    // 타입에 따라 앞에 접두사 추가
+    let prefix = '';
+    if(item.type === 'asp') prefix = '[Asp] ';
+    if(item.type === 'int') prefix = '[Int] ';
+
+    const opt = new Option(mark + prefix + item.n, idx);
+    if (!isFit.ok) opt.disabled = true;
+    el.add(opt);
+  });
+  if(currentVal && !el.options[currentVal]?.disabled) el.value = currentVal;
+}
+
+function setY(level, val) {
+  yVals[level] = val;
+  document.querySelectorAll(`.y${level}`).forEach(btn => btn.classList.remove('active'));
+  event.target.classList.add('active');
+  updateSystem();
+}
+
+function updateSystem() {
+  const s0 = document.getElementById('sel-0');
+  const s1 = document.getElementById('sel-1');
+  const s2 = document.getElementById('sel-2');
+  const s3 = document.getElementById('sel-3');
+
+  const acc = s0.value ? DB.access[s0.value] : null;
+  const mid = s1.value ? DB.inter[s1.value] : null;
+  const mic = s2.value ? DB.micro[s2.value] : null;
+  const stn = s3.value ? DB.stent[s3.value] : null;
+
+  hideConsole();
+
+  // 1. Access
+  if(acc) {
+    document.getElementById('info-0').classList.remove('hidden');
+    document.getElementById('id-0').innerText = acc.id;
+    document.getElementById('wl-0').innerText = acc.wl;
+    
+    s1.disabled = false;
+    s1.options[0].text = "Select Intermediate/Aspiration...";
+    if(!mid) populateSelect('sel-1', DB.inter, (item) => {
+      if(item.od > acc.id) return {ok:false, reason:"❌ ID 부족"};
+      if(item.wl <= acc.wl + yVals[1]) return {ok:false, reason:"⚠️ 길이 짧음"};
+      return {ok:true};
+    });
+  } else { s1.disabled = true; s1.innerHTML='<option>Waiting...</option>'; document.getElementById('info-0').classList.add('hidden'); }
+
+  // 2. Intermediate / Aspiration
+  if(mid && acc) {
+    const margin = mid.wl - (acc.wl + yVals[1]);
+    document.getElementById('info-1').classList.remove('hidden');
+    document.getElementById('type-1').innerText = mid.type === 'asp' ? 'ASPIRATION' : 'INTERMEDIATE';
+    document.getElementById('id-1').innerText = mid.id;
+    document.getElementById('od-1').innerText = mid.od;
+    document.getElementById('wl-1').innerText = margin;
+    document.getElementById('wl-1').className = margin < 5 ? "text-amber-400 font-bold" : "text-emerald-400 font-bold";
+
+    s2.disabled = false;
+    s2.options[0].text = "Select Microcatheter...";
+    if(!mic) populateSelect('sel-2', DB.micro, (item) => {
+      if(item.od > mid.id) return {ok:false, reason:"❌ ID 부족"};
+      if(item.wl <= mid.wl + yVals[2]) return {ok:false, reason:"⚠️ 길이 짧음"};
+      return {ok:true};
+    });
+  } else { s2.disabled = true; s2.innerHTML='<option>Waiting...</option>'; document.getElementById('info-1').classList.add('hidden'); }
+
+  // 3. Microcatheter
+  if(mic && mid) {
+    const margin2 = mic.wl - (mid.wl + yVals[2]);
+    document.getElementById('info-2').classList.remove('hidden');
+    document.getElementById('id-2').innerText = mic.id;
+    document.getElementById('od-2').innerText = mic.od;
+    document.getElementById('wl-2').innerText = margin2;
+    document.getElementById('wl-2').className = margin2 < 5 ? "text-amber-400 font-bold" : "text-emerald-400 font-bold";
+
+    s3.disabled = false;
+    s3.options[0].text = "Select Stent Retriever...";
+    if(!stn) populateSelect('sel-3', DB.stent, (item) => {
+      if(mic.id < item.mid) return {ok:false, reason:"❌ Micro ID 좁음"};
+      return {ok:true};
+    });
+  } else { s3.disabled = true; s3.innerHTML='<option>Waiting...</option>'; document.getElementById('info-2').classList.add('hidden'); }
+
+  // 4. Update Visualizer & Rules
+  updateRulesAndVisualizer(acc, mid, mic, stn);
+
+  // 5. Evaluate Final System Status
+  if(acc && mid) {
+    let status = "ok", title = "SYSTEM COMPATIBLE",
