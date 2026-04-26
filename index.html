@@ -15,13 +15,13 @@
   .glass { background: var(--panel-bg); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.05); border-radius: 1rem; }
   .mono { font-family: 'JetBrains Mono', monospace; }
   
-  /* Select Dropdown Styling */
-  select { width: 100%; background: #0f172a; border: 1px solid #334155; color: #f8fafc; padding: 1rem; border-radius: 0.75rem; appearance: none; outline: none; font-weight: 600; transition: all 0.2s; }
+  /* Select Dropdown Styling - iOS 확대 방지를 위해 font-size 16px 고정 */
+  select { width: 100%; background: #0f172a; border: 1px solid #334155; color: #f8fafc; padding: 1rem; border-radius: 0.75rem; appearance: none; outline: none; font-weight: 600; font-size: 16px; transition: all 0.2s; }
   select:focus { border-color: var(--neon-blue); box-shadow: 0 0 0 2px rgba(59,130,246,0.2); }
   select:disabled { opacity: 0.4; cursor: not-allowed; }
 
-  /* Y-Connector Buttons */
-  .y-btn { flex: 1; padding: 0.6rem 0; font-size: 0.75rem; font-weight: 800; border: 1px solid #334155; color: #64748b; transition: all 0.2s; cursor: pointer; }
+  /* Y-Connector Buttons - 터치 영역 확보 */
+  .y-btn { flex: 1; padding: 0.8rem 0; font-size: 0.75rem; font-weight: 800; border: 1px solid #334155; color: #64748b; transition: all 0.2s; cursor: pointer; }
   .y-btn.active { background: #1e293b; color: white; border-color: #475569; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); }
   .y-btn-0.active { border-bottom-color: #64748b; }
   .y-btn-5.active { border-bottom-color: var(--neon-amber); color: var(--neon-amber); }
@@ -31,7 +31,7 @@
   .chain-line { width: 2px; height: 30px; margin-left: 2rem; background: linear-gradient(to bottom, var(--top-color), var(--bot-color)); }
 
   /* Badge */
-  .badge { font-size: 0.65rem; font-weight: 800; padding: 0.2rem 0.6rem; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .badge { font-size: 0.65rem; font-weight: 800; padding: 0.3rem 0.8rem; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.05em; }
   
   /* Stent Mesh Pattern */
   .mesh-pattern {
@@ -59,7 +59,7 @@
       </div>
       <h1 class="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-400 italic tracking-tight">NeuroCoax <span class="text-sm text-blue-500">V4</span></h1>
     </div>
-    <button onclick="resetAll()" class="badge border border-slate-700 text-slate-400 hover:text-white hover:bg-slate-800 h-6">RESET</button>
+    <button onclick="resetAll()" class="badge border border-slate-700 text-slate-400 hover:text-white hover:bg-slate-800">RESET</button>
   </header>
 
   <div class="glass p-5 relative overflow-hidden">
@@ -155,7 +155,7 @@
 
 <script>
 // ==========================================
-// 1. MASSIVE DATABASE (With Type Classifications)
+// 1. MASSIVE DATABASE (생략 없이 모두 포함)
 // ==========================================
 const DB = {
   access: [
