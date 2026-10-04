@@ -1,9 +1,8 @@
 name: ipo-alert
 
 on:
-  schedule:
-    # 매주 월요일 08:00 KST = 일요일 23:00 UTC. GitHub 스케줄은 수 분 이상 늦게 시작될 수 있다.
-    - cron: "0 23 * * 0"
+  # 자동 실행은 껐다. Gmail 앱 비밀번호 로그인이 GitHub 서버에서 계속 거절되어,
+  # 매주 발송은 Claude 루틴(Gmail 연결)으로 옮겼다. 수동 실행만 남긴다.
   workflow_dispatch:
     inputs:
       dry_run:
