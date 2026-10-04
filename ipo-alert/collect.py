@@ -256,6 +256,9 @@ def parse_detail_page(html: str, offering: Offering) -> Offering:
     offering.band = _band(_value_after(cells, "희망공모가액"))
     offering.inst_ratio = _ratio(_value_after(cells, "기관경쟁률"))
     offering.lockup = _percent(_value_after(cells, "의무보유확약"))
+    if offering.inst_ratio is None:
+        # 수요예측 전에는 확약 칸에 '0.00%' 가 미리 채워져 있다. 결과가 없으면 확약도 없는 것으로 본다.
+        offering.lockup = None
     return offering
 
 

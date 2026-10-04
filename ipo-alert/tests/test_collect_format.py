@@ -67,7 +67,7 @@ DETAIL_HTML_UNPRICED = """
   <tr><td>공모청약일</td><td>2026.10.07 ~ 2026.10.08</td></tr>
   <tr><td>환불일</td><td>2026.10.12</td></tr>
   <tr><td>상장일</td><td></td></tr>
-  <tr><td>기관경쟁률</td><td></td><td>의무보유확약</td><td></td></tr>
+  <tr><td>기관경쟁률</td><td></td><td>의무보유확약</td><td>0.00%</td></tr>
 </table>
 """
 
