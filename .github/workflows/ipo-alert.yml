@@ -1,0 +1,40 @@
+name: ipo-alert
+
+on:
+  schedule:
+    # 매주 월요일 08:00 KST = 일요일 23:00 UTC. GitHub 스케줄은 수 분 이상 늦게 시작될 수 있다.
+    - cron: "0 23 * * 0"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "메일 대신 로그에 본문 출력"
+        type: boolean
+        default: true
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ipo-alert
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt
+      - run: python -m unittest discover -s tests
+      - name: Run
+        env:
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
+          DART_API_KEY: ${{ secrets.DART_API_KEY }}
+        run: python send.py ${{ inputs.dry_run && '--dry-run' || '' }}
+      - name: Keep logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs-${{ github.run_id }}
+          path: ipo-alert/logs/
+          retention-days: 30
