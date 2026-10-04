@@ -1,6 +1,6 @@
 # 공모주 알림
 
-평일 아침 8시(KST)에 앞으로 7일 안의 공모주 청약 일정을 Gmail로 보낸다. 규칙은 `CLAUDE.md`에 있다.
+매주 월요일 아침 8시(KST)에 그 주(월-일) 7일 안의 공모주 청약 일정을 Gmail로 보낸다. 규칙은 `CLAUDE.md`에 있다.
 
 ## 실행
 
@@ -12,9 +12,9 @@ python send.py              # 메일 발송
 python -m unittest discover -s tests
 ```
 
-GitHub Actions(`.github/workflows/ipo-alert.yml`)가 평일 08:00 KST에 실행한다.
+GitHub Actions(`.github/workflows/ipo-alert.yml`)가 매주 월요일 08:00 KST에 실행한다.
 저장소 Settings - Secrets and variables - Actions 에 `GMAIL_ADDRESS`, `GMAIL_APP_PASSWORD`,
-`MAIL_TO`(선택), `DART_API_KEY`(선택)를 넣는다. 로그는 실행마다 artifact로 30일 보관된다.
+`MAIL_TO`(받는 주소, 비우면 GMAIL_ADDRESS), `DART_API_KEY`(선택)를 넣는다. 로그는 실행마다 artifact로 30일 보관된다.
 
 ## 데이터 출처 확인 결과 (2026-10-04 확인)
 
@@ -44,4 +44,4 @@ OpenDART (교차 확인용)
 - 출처 간 불일치: 청약일과 확정 공모가만 비교한다. 공모가 확정 전의 신고서 가액은 비교하지 않는다.
 - OpenDART 조회가 실패해도 38커뮤니케이션 결과는 보낸다. 실패 사실은 본문 아래에 적는다.
 - 재시도: 첫 시도 실패 후 30초 간격으로 최대 3번. 그래도 실패하면 실패 메일을 보낸다.
-- 공휴일은 따로 빼지 않는다. 평일이면 공휴일에도 보낸다.
+- 공휴일은 따로 빼지 않는다. 월요일이 공휴일이어도 보낸다.
