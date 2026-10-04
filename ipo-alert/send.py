@@ -49,9 +49,11 @@ def setup_logging(today_str: str) -> None:
 
 
 def send_mail(subject: str, body: str) -> None:
-    sender = os.environ["GMAIL_ADDRESS"]
-    password = os.environ["GMAIL_APP_PASSWORD"]
-    to = os.environ.get("MAIL_TO") or sender
+    # 붙여넣기할 때 섞이기 쉬운 공백과 줄바꿈을 없앤다. 앱 비밀번호는 4자리씩 띄어 보여 준다.
+    sender = os.environ["GMAIL_ADDRESS"].strip()
+    password = "".join(os.environ["GMAIL_APP_PASSWORD"].split())
+    to = (os.environ.get("MAIL_TO") or "").strip() or sender
+    log.info("보내는 주소 형식 %s, 앱 비밀번호 %d자", _mask(sender), len(password))
 
     msg = EmailMessage()
     msg["Subject"] = subject
@@ -63,6 +65,11 @@ def send_mail(subject: str, body: str) -> None:
         smtp.login(sender, password)
         smtp.send_message(msg)
     log.info("메일 발송 완료: %s", subject)
+
+
+def _mask(address: str) -> str:
+    """로그에는 주소 대신 형식만 남긴다. 예: ***@gmail.com"""
+    return "***@" + address.split("@")[-1] if "@" in address else "@ 없음"
 
 
 def collect_with_retry(today, dart_api_key):
