@@ -10,6 +10,7 @@ format.py 에서 "확인 필요"로 바꾼다.
 
 import logging
 import re
+import ssl
 import time
 from dataclasses import dataclass, field
 from datetime import date, timedelta
@@ -17,6 +18,7 @@ from html.parser import HTMLParser
 from urllib.parse import urljoin
 
 import requests
+from requests.adapters import HTTPAdapter
 
 log = logging.getLogger(__name__)
 
@@ -272,9 +274,36 @@ def _get(session: requests.Session, url: str, **kw) -> requests.Response:
     return resp
 
 
+class _LegacyTLSAdapter(HTTPAdapter):
+    """38커뮤니케이션 전용. 이 서버는 오래된 TLS 설정을 써서 OpenSSL 3 기본값으로는
+    'sslv3 alert handshake failure' 가 난다. 인증서 검증은 그대로 두고 허용 범위만 넓힌다.
+    """
+
+    def _context(self):
+        ctx = ssl.create_default_context()
+        ctx.set_ciphers("DEFAULT:@SECLEVEL=0")
+        ctx.minimum_version = ssl.TLSVersion.TLSv1
+        ctx.options |= getattr(ssl, "OP_LEGACY_SERVER_CONNECT", 0x4)
+        return ctx
+
+    def init_poolmanager(self, *args, **kwargs):
+        kwargs["ssl_context"] = self._context()
+        return super().init_poolmanager(*args, **kwargs)
+
+    def proxy_manager_for(self, *args, **kwargs):
+        kwargs["ssl_context"] = self._context()
+        return super().proxy_manager_for(*args, **kwargs)
+
+
 def _get_38(session: requests.Session, url: str) -> str:
+    try:
+        resp = _get(session, url)
+    except requests.exceptions.SSLError:
+        # 완화한 TLS 로도 안 되면 공개 페이지라 http 로 한 번 더 시도한다.
+        log.warning("HTTPS 접속 실패, HTTP로 재시도: %s", url)
+        resp = _get(session, url.replace("https://", "http://", 1))
     # 38커뮤니케이션은 EUC-KR 계열로 응답한다. cp949 가 EUC-KR 의 상위 집합이다.
-    return _get(session, url).content.decode("cp949", errors="replace")
+    return resp.content.decode("cp949", errors="replace")
 
 
 def in_window(start: date, end: date, today: date) -> bool:
@@ -396,6 +425,7 @@ def collect(today: date, dart_api_key: str | None = None) -> CollectResult:
     """
     session = requests.Session()
     session.headers["User-Agent"] = USER_AGENT
+    session.mount(BASE_38, _LegacyTLSAdapter())
     offerings = collect_38(session, today)
     sources = [LIST_URL_38] + [o.detail_url for o in offerings]
     warnings = []
